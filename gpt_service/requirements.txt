@@ -1,0 +1,15 @@
+Django~=4.0.10
+djangorestframework~=3.14
+django-cors-headers~=4.1.0
+dj-database-url==1.0.0
+python-dotenv~=0.19.2
+python-dotenv
+
+# Databases
+#psycopg2
+psycopg2-binary==2.9.3
+redis
+
+requests
+
+openai~=0.27

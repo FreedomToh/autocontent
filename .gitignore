@@ -1,0 +1,11 @@
+/gpt_service/.idea
+/databases/pgdata
+/logs
+/gpt_service/logs
+/venv
+/virtualenv
+*.pyc
+.env
+*.log
+db.sqlite3
+confs.py

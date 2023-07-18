@@ -1,0 +1,34 @@
+version: "3.8"
+
+services:
+  autocontent_pg:
+    image: postgres:14
+    container_name: autocontent_pg
+    restart: always
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data/
+      - ./init/:/docker-entrypoint-initdb.d/
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    networks:
+      - docker_nw
+    env_file:
+      - ./.env
+    ports:
+      - "5433:5432"
+  autocontent_redis:
+    image: redis:alpine
+    container_name: autocontent_redis
+    networks:
+      - docker_nw
+    ports:
+      - "6379:5432"
+
+volumes:
+  postgres_data:
+
+networks:
+    docker_nw:
+        driver: bridge
+        external: true
