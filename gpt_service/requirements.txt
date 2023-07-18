@@ -9,6 +9,7 @@ python-dotenv
 #psycopg2
 psycopg2-binary==2.9.3
 redis
+django_redis==5.0.0
 
 requests
 

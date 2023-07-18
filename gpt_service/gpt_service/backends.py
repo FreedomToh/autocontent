@@ -19,7 +19,7 @@ def request_to_gpt(text: None, user_name: str = None):
     else:
         user_obj = models.User.create_user()
 
-    # handler = ChatGptHandler(user_obj, text)
-    telegram = TelegramApi()
-    telegram.send("test")
+    handler = ChatGptHandler(user_obj, text)
+    result = handler.ask_gpt()
+    print(result)
 

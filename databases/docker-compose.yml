@@ -23,7 +23,7 @@ services:
     networks:
       - docker_nw
     ports:
-      - "6379:5432"
+      - "6379:6379"
 
 volumes:
   postgres_data:

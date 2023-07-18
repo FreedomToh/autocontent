@@ -4,6 +4,8 @@ from gpt_service.backends import request_to_gpt
 
 
 class Command(BaseCommand):
+    help = 'python manage.py request --text "Расскажи анекдот" --username backend'
+
     def add_arguments(self, parser):
         parser.add_argument(
             '--text',
@@ -23,8 +25,6 @@ class Command(BaseCommand):
             return
 
         username = options.get("username")
-        # if not username:
-        #     username = "backend"
         request_to_gpt(options.get("text", ""), username)
 
 
