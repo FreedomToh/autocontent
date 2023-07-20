@@ -14,3 +14,6 @@ django_redis==5.0.0
 requests
 
 openai~=0.27
+
+# rmq
+pika

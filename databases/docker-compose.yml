@@ -5,25 +5,18 @@ services:
     image: postgres:14
     container_name: autocontent_pg
     restart: always
-    volumes:
-      - ./pgdata:/var/lib/postgresql/data/
-      - ./init/:/docker-entrypoint-initdb.d/
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data/
+      - ./init/:/docker-entrypoint-initdb.d/
     networks:
       - docker_nw
     env_file:
       - ./.env
     ports:
       - "5433:5432"
-  autocontent_redis:
-    image: redis:alpine
-    container_name: autocontent_redis
-    networks:
-      - docker_nw
-    ports:
-      - "6379:6379"
 
 volumes:
   postgres_data:

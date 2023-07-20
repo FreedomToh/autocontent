@@ -12,7 +12,6 @@ class TelegramApi:
     }
 
     def __init__(self):
-        print(self.telegram_config)
         if telegram_conf.service_name and len(str(telegram_conf.service_name)) > 0:
             self.service_name = telegram_conf.service_name
 

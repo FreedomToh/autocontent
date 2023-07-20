@@ -40,3 +40,8 @@ class FailRequestsResponse(Exception):
     """Django is somehow improperly configured"""
     pass
 
+
+class RMQNoConfigError(Exception):
+    """Django is somehow improperly configured"""
+    pass
+
