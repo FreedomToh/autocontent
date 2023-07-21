@@ -2,11 +2,11 @@ import logging
 
 from django.core.management import BaseCommand
 
-from gpt_service.backends import request_to_gpt, result_to_database, get_user_by_name
+from gpt_service.backends import request_to_gpt, result_to_database, get_user_by_name, request_to_db
 
 
 class Command(BaseCommand):
-    help = 'python manage.py request --text "Расскажи анекдот" --username backend --save True'
+    help = 'python manage.py request --text "Расскажи анекдот" --username backend --save True --now=True'
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -22,6 +22,12 @@ class Command(BaseCommand):
         )
 
         parser.add_argument(
+            '--now',
+            action='store',
+            help='Get answer immediatley',
+        )
+
+        parser.add_argument(
             '--save',
             action='store',
             help='User`s domain',
@@ -33,7 +39,12 @@ class Command(BaseCommand):
             return
 
         user = get_user_by_name(options.get("username"))
-        result = request_to_gpt(options.get("text", ""), user)
+
+        if options.get("now", False) in ["true", "True", True]:
+            result = request_to_gpt(options.get("text", ""), user)
+        else:
+            request_to_db(options.get("text", ""), user)
+            return
         if "error" in result:
             logging.error(f"requests command fail: {result}")
             return

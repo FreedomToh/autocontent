@@ -1,4 +1,7 @@
+import datetime
+import json
 import logging
+import time
 
 import pika
 from django.conf import settings
@@ -54,4 +57,37 @@ class Rabbit:
 
         self.channel.queue_bind(exchange=self.exchange_tank, queue=self.queue_tank, )
         self.channel.queue_bind(exchange=self.exchange, queue=self.queue, )
+
+    def __prepare_rabbit_data(self, data: dict, _type):
+        body = {
+            'meta': {
+                'time_send_to_mq_epoch': time.time(),
+                'time_send_to_mq_stamp': datetime.datetime.utcnow().isoformat(),
+            },
+            'data': {
+                'type': _type,
+                **data
+            },
+        }
+        return json.dumps(body).encode()
+
+    def publish(self, data: dict) -> bool:
+        logging.info(f'Rabbit adding request to queue: {data.get("request_id")}')
+
+        need_data = {
+            "request_id": data.get("request_id")
+        }
+        try:
+            self.channel.basic_publish(
+                exchange='',
+                routing_key=self.queue,
+                body=self.__prepare_rabbit_data(need_data, "gpt_request"),
+                properties=pika.BasicProperties(delivery_mode=2, content_type='application/json')
+            )
+        except Exception as ex:
+            logging.error(f"Rabbit add request to queue fail: {ex}")
+            return False
+        return True
+
+
 

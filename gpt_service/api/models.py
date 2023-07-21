@@ -89,10 +89,11 @@ class StatusesModel(models.Model):
 
 
 class RequestStatusesModel(models.Model):
-    request_id = models.ForeignKey(RequestsModel, on_delete=models.CASCADE)
-    gpt_status = models.ForeignKey(StatusesModel, related_name="gpt_status", on_delete=models.DO_NOTHING)
-    audio_status = models.ForeignKey(StatusesModel, related_name="audio_status", on_delete=models.DO_NOTHING)
-    video_status = models.ForeignKey(StatusesModel, related_name="video_status", on_delete=models.DO_NOTHING)
+    request_id = models.OneToOneField(RequestsModel, on_delete=models.CASCADE, primary_key=True)
+    gpt_status = models.ForeignKey(StatusesModel, related_name="gpt_status", on_delete=models.DO_NOTHING, default=0)
+    audio_status = models.ForeignKey(StatusesModel, related_name="audio_status", on_delete=models.DO_NOTHING, default=0)
+    video_status = models.ForeignKey(StatusesModel, related_name="video_status", on_delete=models.DO_NOTHING, default=0)
 
     class Meta:
         db_table = "requests_status"
+
