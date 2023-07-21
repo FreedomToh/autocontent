@@ -1,8 +1,0 @@
-#!/bin/bash
-set -e
-
-psql <<- EOSQL
-    CREATE USER $GPT_USER WITH PASSWORD '$GPT_PASSWORD';
-    CREATE DATABASE requests;
-    GRANT ALL PRIVILEGES ON DATABASE requests TO $GPT_USER;
-EOSQL

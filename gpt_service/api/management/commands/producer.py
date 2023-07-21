@@ -1,7 +1,6 @@
 from django.core.management import BaseCommand
 
-from gpt_service.rmq_backend import run_producer
-from django.conf import settings
+from gpt_service.producer_backend import run_producer
 
 
 class Command(BaseCommand):

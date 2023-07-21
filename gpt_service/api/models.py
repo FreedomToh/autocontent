@@ -51,18 +51,48 @@ class User(CreateUpdateTracker):
         return f'{self.username}' if self.username is not None else f'{self.user_id}'
 
     @classmethod
-    def create_user(cls):
+    def create_user(cls, username=None, is_admin=False):
         logging.info("Creating user")
 
         new_id = 0
         if cls.objects.count() > 0:
             new_id = cls.objects.all().order_by("-user_id").first().user_id + 1
 
-        obj = cls(user_id=new_id)
+        if username:
+            obj = cls(user_id=new_id, is_admin=is_admin, username=username)
+        else:
+            obj = cls(user_id=new_id, is_admin=is_admin)
         obj.save()
         return obj
 
 
-class DialogsModel(models.Model):
-    user_id = models.ForeignKey(User, on_delete=models.CASCADE)
-    gpt_tokens = models.IntegerField(default=0)
+class RequestsModel(models.Model):
+    request_id = models.AutoField(primary_key=True)
+    request_src = models.CharField(max_length=255)
+    user_id = models.ForeignKey(User, on_delete=models.DO_NOTHING)
+    request_text = models.TextField(**nb)
+    response_text = models.TextField(**nb)
+    audio_url = models.TextField(**nb)
+    video_url = models.TextField(**nb)
+    finished = models.BooleanField(default=False)
+
+    class Meta:
+        db_table = "gpt_requests"
+
+
+class StatusesModel(models.Model):
+    id = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=100)
+
+    class Meta:
+        db_table = "statuses"
+
+
+class RequestStatusesModel(models.Model):
+    request_id = models.ForeignKey(RequestsModel, on_delete=models.CASCADE)
+    gpt_status = models.ForeignKey(StatusesModel, related_name="gpt_status", on_delete=models.DO_NOTHING)
+    audio_status = models.ForeignKey(StatusesModel, related_name="audio_status", on_delete=models.DO_NOTHING)
+    video_status = models.ForeignKey(StatusesModel, related_name="video_status", on_delete=models.DO_NOTHING)
+
+    class Meta:
+        db_table = "requests_status"

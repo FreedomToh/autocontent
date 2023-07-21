@@ -39,12 +39,11 @@ class ChatGptHandler:
                 self.dialog = dialog_template
                 cache.set(self.redis_dialog_key, dialog_template, CHAT_HISTORY_LIFETIME)
         else:
-            logging.warning("ChatGptHandler get_dialog_history: no caching init, dialogs wouldn`t be save")
+            logging.warning("ChatGptHandler get_dialog_history: no caching fixtures, dialogs wouldn`t be save")
             self.dialog = dialog_template
 
     def update_history(self):
         if self.redis:
-            print("updating", self.redis_dialog_key, self.dialog)
             cache.set(self.redis_dialog_key, self.dialog, CHAT_HISTORY_LIFETIME)
 
     def init_redis(self):
