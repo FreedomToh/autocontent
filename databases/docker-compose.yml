@@ -17,6 +17,29 @@ services:
       - ./.env
     ports:
       - "5433:5432"
+  autocontent_redis:
+    image: redis:alpine
+    container_name: autocontent_redis
+    restart: always
+    networks:
+      - docker_nw
+    ports:
+      - "6379:6379"
+  autocontent_rmq:
+    #https://habr.com/ru/companies/southbridge/articles/704208/
+    image: rabbitmq:3.10.7-management
+    container_name: autocontent_rmq
+    hostname: rmq_master
+    restart: always
+    networks:
+      - docker_nw
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+    env_file:
+      - ./.env
+    volumes:
+      - ./rmqdata:/var/lib/rabbitmq
 
 volumes:
   postgres_data:
