@@ -1,12 +1,7 @@
 import os
-import dotenv
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-
-dotenv_file = ".env"
-if os.path.exists(dotenv_file):
-    dotenv.load_dotenv(dotenv_file)
 
 SECRET_KEY = os.getenv("DJANGO_SECRET")
 DEBUG = os.getenv("DJANGO_DEBUG", False) in ["True", "true", True]

@@ -7,6 +7,7 @@
 /virtualenv
 *.pyc
 .env
+.env_dev
 *.log
 db.sqlite3
 confs.py

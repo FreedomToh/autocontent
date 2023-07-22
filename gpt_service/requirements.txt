@@ -7,13 +7,15 @@ python-dotenv
 
 # Databases
 #psycopg2
-psycopg2-binary==2.9.3
+psycopg2-binary
 redis
 django_redis==5.0.0
 
 requests
-
 openai~=0.27
 
 # rmq
 pika
+
+
+uwsgi

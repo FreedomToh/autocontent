@@ -1,0 +1,50 @@
+version: "3.8"
+
+services:  
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: api
+    restart: always
+    networks:
+      - docker_nw
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/code
+    env_file:
+      - .env
+      
+  producer:
+    build:
+      context: .
+      dockerfile: DockerfileProducer
+    container_name: producer
+    restart: always
+    networks:
+      - docker_nw
+    volumes:
+      - .:/code
+    env_file:
+      - .env
+  consumer:
+    build:
+      context: .
+      dockerfile: DockerfileConsumer
+    container_name: consumer
+    restart: always
+    networks:
+      - docker_nw
+    volumes:
+      - .:/code
+    env_file:
+      - .env
+
+volumes:
+  postgres_data:
+
+networks:
+    docker_nw:
+        driver: bridge
+        external: true
