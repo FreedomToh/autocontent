@@ -1,4 +1,6 @@
 import logging
+import sys
+import time
 
 from django.conf import settings
 from api import models, serializers
@@ -20,6 +22,8 @@ def add_request_to_queue(rabbit: Rabbit, request: models.RequestsModel):
     serializer = serializers.RequestModelSerializer(request)
     if rabbit.publish(serializer.data):
         change_status(request, statuses=statuses, gpt_status="INPROCESS")
+        return True
+    return False
 
 
 def run_producer():
@@ -35,9 +39,16 @@ def run_producer():
         arguments=settings.RMQ_ARGS,
         tank_arguments=settings.RMQ_TANK_ARGS,
     )
-    while True:
-        text_requests = get_query_elements()
-        for request in text_requests:
-            add_request_to_queue(rabbit, request.request_id)
+    try:
+        while True:
+            text_requests = get_query_elements()
+            for request in text_requests:
+                add_request_to_queue(rabbit, request.request_id)
 
-        break
+            time.sleep(settings.RMQ_PRODUCER_SLEEP)
+    except KeyboardInterrupt:
+        logging.info(f'Exit')
+    except Exception as ex:
+        logging.error(f"normalizer producer run fail: {ex}")
+
+    rabbit.close()

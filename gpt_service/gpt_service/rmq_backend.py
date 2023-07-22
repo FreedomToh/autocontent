@@ -3,6 +3,9 @@ import json
 import logging
 import time
 
+import functools
+import threading
+
 import pika
 from django.conf import settings
 
@@ -34,6 +37,7 @@ class Rabbit:
 
         self.__init_connection__()
         self.__init_channel__()
+        self.__binding_queue__()
 
     def __init_connection__(self):
         if not self.host:
@@ -49,16 +53,19 @@ class Rabbit:
 
         self.channel = self.connection.channel()
         self.channel.basic_qos(prefetch_count=settings.RMQ_PREFETCH_COUNT, global_qos=settings.RMQ_PREFETCH_GLOBAL)
+
+    def __binding_queue__(self):
         self.channel.exchange_declare(exchange=self.exchange, exchange_type='fanout')
-        self.channel.exchange_declare(exchange=self.exchange_tank, exchange_type='fanout')
-
         self.channel.queue_declare(queue=self.queue, durable=True, arguments=self.arguments)
-        self.channel.queue_declare(queue=self.queue_tank, durable=True, arguments=self.tank_arguments)
-
-        self.channel.queue_bind(exchange=self.exchange_tank, queue=self.queue_tank, )
         self.channel.queue_bind(exchange=self.exchange, queue=self.queue, )
 
-    def __prepare_rabbit_data(self, data: dict, _type):
+    def __binding_queue_tank__(self):
+        self.channel.exchange_declare(exchange=self.exchange_tank, exchange_type='fanout')
+        self.channel.queue_declare(queue=self.queue_tank, durable=True, arguments=self.tank_arguments)
+        self.channel.queue_bind(exchange=self.exchange_tank, queue=self.queue_tank, )
+
+    @classmethod
+    def __prepare_rabbit_data(cls, data: dict, _type):
         body = {
             'meta': {
                 'time_send_to_mq_epoch': time.time(),
@@ -71,6 +78,10 @@ class Rabbit:
         }
         return json.dumps(body).encode()
 
+    @classmethod
+    def decode_rabbit_data(cls, body: bytes):
+        return json.loads(body)
+
     def publish(self, data: dict) -> bool:
         logging.info(f'Rabbit adding request to queue: {data.get("request_id")}')
 
@@ -79,15 +90,47 @@ class Rabbit:
         }
         try:
             self.channel.basic_publish(
-                exchange='',
+                exchange=self.exchange,
                 routing_key=self.queue,
-                body=self.__prepare_rabbit_data(need_data, "gpt_request"),
+                body=self.__prepare_rabbit_data(need_data, self.queue),
                 properties=pika.BasicProperties(delivery_mode=2, content_type='application/json')
             )
         except Exception as ex:
             logging.error(f"Rabbit add request to queue fail: {ex}")
             return False
         return True
+
+    def bind_func(self, func, args=()):
+        logging.info(f"Rabbit binding function to {self.queue}")
+        # on_message_callback = functools.partial(func, args=args)
+        self.channel.basic_consume(
+            queue=self.queue,
+            on_message_callback=func,
+            auto_ack=False
+        )
+
+    def close(self):
+        logging.info("Rabbit close connection")
+        if self.connection.is_open:
+            try:
+                self.connection.close()
+            except Exception as ex:
+                logging.error(f"Rabbit close connection: {ex}")
+
+    def start_consuming(self):
+        logging.info("Rabbit starting consuming")
+        self.channel.start_consuming()
+
+    def stop_consuming(self):
+        logging.info("Rabbit stopping consuming")
+        try:
+            self.channel.stop_consuming()
+        except Exception as ex:
+            logging.error(f"Rabbit stopping consuming: {ex}")
+
+    def __del__(self):
+        self.stop_consuming()
+        self.close()
 
 
 

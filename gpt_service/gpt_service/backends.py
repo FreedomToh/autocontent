@@ -4,7 +4,7 @@ import uuid
 from rest_framework.generics import get_object_or_404
 
 from api import models, serializers
-from api.serializers import init_statuses
+from api.serializers import init_statuses, get_statuses
 from gpt_service.chat_gpt_handler import ChatGptHandler
 
 

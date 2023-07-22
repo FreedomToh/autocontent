@@ -38,7 +38,7 @@ def init_statuses(instance: models.RequestsModel):
     return statuses_model.save()
 
 
-def change_status(instance: models.RequestsModel, statuses: dict,
+def change_status(instance: models.RequestsModel, statuses: dict = None,
                   gpt_status: str = None, audio_status: str = None, video_status: str = None):
     if not statuses:
         statuses = get_statuses()
