@@ -20,7 +20,7 @@ class CreateUpdateTracker(CreateTracker):
 
     class Meta(CreateTracker.Meta):
         abstract = True
-        db_table = "gpt_users"
+        db_table = "requests_users"
 
 
 class GetOrNoneManager(models.Manager):
@@ -77,7 +77,7 @@ class RequestsModel(models.Model):
     finished = models.BooleanField(default=False)
 
     class Meta:
-        db_table = "gpt_requests"
+        db_table = "requests"
         # app_label = "gpt_requests"
 
 
@@ -98,5 +98,6 @@ class RequestStatusesModel(models.Model):
 
     class Meta:
         db_table = "requests_status"
+        app_label = "api"
         # app_label = "requests_status"
 

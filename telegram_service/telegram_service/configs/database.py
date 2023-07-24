@@ -12,10 +12,6 @@ DB_URL = f'postgres://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/requests'
 DATABASES = {
     # 'default': dj_database_url.config(default=DB_URL)
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': 'db.sqlite3',
-    },
-    'requests': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'requests',
 
@@ -24,10 +20,15 @@ DATABASES = {
         'HOST': DB_HOST,
         'PORT': DB_PORT
     },
+    "migrations": {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': 'db.sqlite3',
+    },
 }
 
-DATABASE_ROUTERS = ["gpt_service.configs.database.DatabaseRouter"]
+DATABASE_ROUTERS = ["telegram_service.configs.database.DatabaseRouter"]
 
 
 class DatabaseRouter:
-    ...
+    def db_for_schema(self, *args, **kwargs):
+        return "migrations"

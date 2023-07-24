@@ -10,12 +10,7 @@ DB_PORT = os.getenv("DB_PORT")
 
 DB_URL = f'postgres://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/requests'
 DATABASES = {
-    # 'default': dj_database_url.config(default=DB_URL)
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': 'db.sqlite3',
-    },
-    'requests': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'requests',
 
@@ -25,9 +20,3 @@ DATABASES = {
         'PORT': DB_PORT
     },
 }
-
-DATABASE_ROUTERS = ["gpt_service.configs.database.DatabaseRouter"]
-
-
-class DatabaseRouter:
-    ...
