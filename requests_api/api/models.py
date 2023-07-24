@@ -98,6 +98,5 @@ class RequestStatusesModel(models.Model):
 
     class Meta:
         db_table = "requests_status"
-        app_label = "api"
         # app_label = "requests_status"
 

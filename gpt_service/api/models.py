@@ -12,6 +12,7 @@ class CreateTracker(models.Model):
 
     class Meta:
         abstract = True
+        managed = False
         ordering = ('-created_at',)
 
 
@@ -20,7 +21,9 @@ class CreateUpdateTracker(CreateTracker):
 
     class Meta(CreateTracker.Meta):
         abstract = True
-        db_table = "gpt_users"
+        db_table = "requests_users"
+        app_label = "api"
+
 
 
 class GetOrNoneManager(models.Manager):
@@ -77,8 +80,9 @@ class RequestsModel(models.Model):
     finished = models.BooleanField(default=False)
 
     class Meta:
-        db_table = "gpt_requests"
-        # app_label = "gpt_requests"
+        db_table = "requests"
+        app_label = "api"
+        managed = False
 
 
 class StatusesModel(models.Model):
@@ -87,7 +91,8 @@ class StatusesModel(models.Model):
 
     class Meta:
         db_table = "statuses"
-        # app_label = "statuses"
+        app_label = "api"
+        managed = False
 
 
 class RequestStatusesModel(models.Model):
@@ -98,5 +103,6 @@ class RequestStatusesModel(models.Model):
 
     class Meta:
         db_table = "requests_status"
-        # app_label = "requests_status"
+        app_label = "api"
+        managed = False
 
