@@ -7,6 +7,8 @@ services:
       dockerfile: Dockerfile
     container_name: api
     restart: always
+    environment:
+      - DJANGO_PROD=true
     networks:
       - docker_nw
     ports:
@@ -22,6 +24,8 @@ services:
       dockerfile: DockerfileProducer
     container_name: producer
     restart: always
+    environment:
+      - DJANGO_PROD=true
     networks:
       - docker_nw
     volumes:
@@ -34,6 +38,8 @@ services:
       dockerfile: DockerfileConsumer
     container_name: consumer
     restart: always
+    environment:
+      - DJANGO_PROD=true
     networks:
       - docker_nw
     volumes:

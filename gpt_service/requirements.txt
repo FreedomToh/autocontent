@@ -3,7 +3,6 @@ djangorestframework~=3.14
 django-cors-headers~=4.1.0
 dj-database-url==1.0.0
 python-dotenv~=0.19.2
-python-dotenv
 
 # Databases
 #psycopg2
