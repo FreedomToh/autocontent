@@ -1,9 +1,15 @@
-from telegram_service.configs.dev import *
+import os
+
+if os.getenv('DJANGO_PROD', False) in ["true", "True", True]:
+    from telegram_service.configs.prod import *
+else:
+    from telegram_service.configs.dev import *
+
 from telegram_service.configs.base import *
 from telegram_service.configs.database import *
 from telegram_service.configs.loggs import *
-#from telegram_service.configs.redis_config import *
 from telegram_service.configs.rmq import *
+from telegram_service.configs.telegram_conf import *
 
 import logging
 logging.getLogger('pika').setLevel(logging.WARNING)
