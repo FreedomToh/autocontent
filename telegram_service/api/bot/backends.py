@@ -28,17 +28,30 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await context.bot.send_message(chat_id=update.effective_chat.id, text=message)
 
 
+async def wrap_message_send(update: Update, context: ContextTypes.DEFAULT_TYPE, message: dict):
+    if not message:
+        await context.bot.send_message(chat_id=update.effective_chat.id, text="Возникла ошибка")
+    elif "message" in message:
+        await context.bot.send_message(chat_id=update.effective_chat.id, text=message.get("message"))
+    elif "error" in message:
+        await context.bot.send_message(chat_id=update.effective_chat.id, text=message.get("error", "Возникла ошибка"))
+    else:
+        logging.warning(f"Incorrect data in message: {message}")
+        await context.bot.send_message(chat_id=update.effective_chat.id, text="Возникла ошибка")
+
+
 async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_obj = await backends_acync.afind_user_or_create(update.message.from_user)
     request_user = await request_models.find_user_or_create(update.message.from_user)
     logging.info(f"Request for user {user_obj.user_id} ({request_user}): {update.message.text} ")
-    result = await create_task(update.message, request_user)
 
-    if not result:
+    if not await backends_acync.track_request(update.message, user_obj):
         await context.bot.send_message(chat_id=update.effective_chat.id, text="Возникла ошибка")
-    elif "error" in result:
-        await context.bot.send_message(chat_id=update.effective_chat.id, text=result.get("error", "Возникла ошибка"))
-    await context.bot.send_message(chat_id=update.effective_chat.id, text="Запрос обрабатывается")
+        return
+
+    message = await create_task(update.message, request_user)
+    await wrap_message_send(update, context, message)
+
 
 
 async def with_attachment(update: Update, context: ContextTypes.DEFAULT_TYPE):

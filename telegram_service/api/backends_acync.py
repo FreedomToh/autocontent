@@ -1,7 +1,10 @@
+import logging
+
 import telegram
 from asgiref.sync import sync_to_async
+from telegram import Update
 
-from api.models import TelegramUser
+from api.models import TelegramUser, TelegramRequests
 
 
 async def _acreate_user_and_return(**kwargs):
@@ -30,4 +33,18 @@ async def afind_user_by_name(username: str) -> TelegramUser:
         return await user_objects.afirst()
 
     return None
+
+
+async def track_request(message: Update.message, user: TelegramUser) -> bool:
+    text_max_length = TelegramRequests._meta.get_field("request").max_length
+    if len(message.text) > text_max_length:
+        logging.warning(f"Превышена максимальная длина запроса в {text_max_length} символов")
+        return False
+
+    request_object = TelegramRequests(
+        request=message.text,
+        user_id=user.user_id
+    )
+    await request_object.asave()
+    return True
 

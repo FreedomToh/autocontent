@@ -99,10 +99,6 @@ async def find_user_or_create(user: telegram.User, create=True) -> User:
 
 
 async def create_task(message: Update.message, user: User) -> dict:
-    if not await find_user_or_create(user, create=False):
-        logging.warning(f"models create_task fail: user {User.user_id} doesn`t exists")
-        return {"error": "Не найден пользователь"}
-
     text_max_length = RequestsModel._meta.get_field("request_src").max_length
     if len(message.text) > text_max_length:
         return {"error": f"Превышена максимальная длина запроса в {text_max_length} символов"}
@@ -113,4 +109,12 @@ async def create_task(message: Update.message, user: User) -> dict:
         user_id=user
     )
     await request_object.asave()
-    return {"status": "Запрос добавлен в обработку"}
+    await init_statuses(request_object)
+    return {"message": "Запрос добавлен в обработку"}
+
+
+async def init_statuses(instance: RequestsModel):
+    status_obj = RequestStatusesModel(
+        request_id=instance
+    )
+    await status_obj.asave()
