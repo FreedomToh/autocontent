@@ -1,22 +1,24 @@
-Django~=4.0.10
+Django~=4.2.3
 djangorestframework~=3.14
+django-rest-framework-async~=0.1
 django-cors-headers~=4.1.0
 dj-database-url==1.0.0
 python-dotenv~=0.19.2
-python-dotenv
 
 # Databases
-psycopg2
+#psycopg2
 psycopg2-binary
 #redis
 #django_redis==5.0.0
 
-python-telegram-bot
+python-telegram-bot~=20.4
+httpx~=0.24.1
 
 requests
-openai~=0.27
 
 # rmq
 pika
 
 uwsgi
+
+asgiref~=3.7.2

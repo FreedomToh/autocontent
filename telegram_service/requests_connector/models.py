@@ -1,42 +1,27 @@
 import logging
-import uuid
 
-from django.core.exceptions import ObjectDoesNotExist
+from asgiref.sync import sync_to_async
 from django.db import models
+
+import telegram
+from telegram import Update
 
 nb = dict(null=True, blank=True)
 
 
-class CreateTracker(models.Model):
-    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
-
-    class Meta:
-        abstract = True
-        ordering = ('-created_at',)
-
-
-class CreateUpdateTracker(CreateTracker):
-    updated_at = models.DateTimeField(auto_now=True)
-
-    class Meta(CreateTracker.Meta):
-        abstract = True
-        db_table = "requests_users"
-
-
-class GetOrNoneManager(models.Manager):
-    """returns none if object doesn't exist else model instance"""
-    def get_or_none(self, **kwargs):
-        try:
-            return self.get(**kwargs)
-        except ObjectDoesNotExist:
-            return None
-
-
-class User(CreateUpdateTracker):
+class User(models.Model):
     user_id = models.PositiveBigIntegerField(primary_key=True)
     username = models.CharField(max_length=32, **nb)
     language_code = models.CharField(max_length=8, help_text="Telegram client's lang", **nb)
     is_admin = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = "requests_users"
+        managed = False
+
+        ordering = ('-created_at',)
 
     def __str__(self):
         return f'{self.username}' if self.username is not None else f'{self.user_id}'
@@ -69,7 +54,7 @@ class RequestsModel(models.Model):
 
     class Meta:
         db_table = "requests"
-        # app_label = "gpt_requests"
+        managed = False
 
 
 class StatusesModel(models.Model):
@@ -78,7 +63,7 @@ class StatusesModel(models.Model):
 
     class Meta:
         db_table = "statuses"
-        # app_label = "statuses"
+        managed = False
 
 
 class RequestStatusesModel(models.Model):
@@ -89,5 +74,43 @@ class RequestStatusesModel(models.Model):
 
     class Meta:
         db_table = "requests_status"
-        # app_label = "requests_status"
+        managed = False
 
+
+async def _create_user_and_return(**kwargs):
+    user_object = User(**kwargs)
+    await user_object.asave()
+
+
+async def find_user_or_create(user: telegram.User, create=True) -> User:
+    user_objects = await sync_to_async(User.objects.filter)(username=user.username)
+    if await user_objects.aexists():
+        return await user_objects.afirst()
+
+    if not create:
+        return None
+
+    await _create_user_and_return(
+        user_id=user.id,
+        username=user.username,
+        language_code=user.language_code,
+    )
+    return await find_user_or_create(user)
+
+
+async def create_task(message: Update.message, user: User) -> dict:
+    if not await find_user_or_create(user, create=False):
+        logging.warning(f"models create_task fail: user {User.user_id} doesn`t exists")
+        return {"error": "Не найден пользователь"}
+
+    text_max_length = RequestsModel._meta.get_field("request_src").max_length
+    if len(message.text) > text_max_length:
+        return {"error": f"Превышена максимальная длина запроса в {text_max_length} символов"}
+
+    request_object = RequestsModel(
+        request_src="telegram",
+        request_text=message.text,
+        user_id=user
+    )
+    await request_object.asave()
+    return {"status": "Запрос добавлен в обработку"}
