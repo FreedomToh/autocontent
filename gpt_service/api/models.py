@@ -25,7 +25,6 @@ class CreateUpdateTracker(CreateTracker):
         app_label = "api"
 
 
-
 class GetOrNoneManager(models.Manager):
     """returns none if object doesn't exist else model instance"""
     def get_or_none(self, **kwargs):

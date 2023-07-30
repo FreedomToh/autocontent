@@ -35,7 +35,7 @@ async def afind_user_by_name(username: str) -> TelegramUser:
     return None
 
 
-async def track_request(message: Update.message, user: TelegramUser) -> bool:
+async def track_request(message: Update.message, user: TelegramUser, message_id : int) -> bool:
     text_max_length = TelegramRequests._meta.get_field("request").max_length
     if len(message.text) > text_max_length:
         logging.warning(f"Превышена максимальная длина запроса в {text_max_length} символов")
@@ -43,7 +43,9 @@ async def track_request(message: Update.message, user: TelegramUser) -> bool:
 
     request_object = TelegramRequests(
         request=message.text,
-        user_id=user.user_id
+        user_id=user.user_id,
+        request_id=message_id,
+        request_id_ext=message.message_id
     )
     await request_object.asave()
     return True

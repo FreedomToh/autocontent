@@ -6,6 +6,7 @@ from django.db import models
 import telegram
 from telegram import Update
 
+
 nb = dict(null=True, blank=True)
 
 
@@ -110,7 +111,7 @@ async def create_task(message: Update.message, user: User) -> dict:
     )
     await request_object.asave()
     await init_statuses(request_object)
-    return {"message": "Запрос добавлен в обработку"}
+    return {"message": "Запрос добавлен в обработку", "message_id": request_object.request_id}
 
 
 async def init_statuses(instance: RequestsModel):
@@ -118,3 +119,13 @@ async def init_statuses(instance: RequestsModel):
         request_id=instance
     )
     await status_obj.asave()
+
+
+def get_statuses_names_dict() -> dict:
+    statuses_objects = StatusesModel.objects.all()
+    return {status_obj.name: status_obj.id for status_obj in statuses_objects}
+
+
+def get_finished_messages(id_list: list = None) -> list:
+    return RequestsModel.objects.filter(finished=True)
+

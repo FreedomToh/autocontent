@@ -1,11 +1,8 @@
 import logging
 
-from asgiref.sync import sync_to_async
 from rest_framework.serializers import ModelSerializer
-from telegram import Update
 
 from requests_connector import models
-from requests_connector.models import User
 
 
 class RequestModelSerializer(ModelSerializer):
@@ -14,15 +11,13 @@ class RequestModelSerializer(ModelSerializer):
         fields = "__all__"
 
 
-## Работает только синхронно
-def create_task(message: Update.message, user: User):
-    serializer = RequestModelSerializer(data={
-        "request_src": "telegram",
-        "request_text": message.text,
-        "user_id": user.user_id
-    })
-    if not serializer.is_valid():
-        logging.error(f"create_task fail: {serializer.errors}")
-        return {"error": "Не удалось создать запрос"}
+def get_message_data(request_id: int) -> dict:
+    request_obj = models.RequestsModel.objects.filter(request_id=request_id)
+    if not request_obj.exists():
+        logging.warning(f"get_message_data fail: message with id {request_id} not exists")
+        return {}
+
+    serializer = RequestModelSerializer(request_obj.first())
+    return serializer.data
 
 

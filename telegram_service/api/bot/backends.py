@@ -40,30 +40,33 @@ async def wrap_message_send(update: Update, context: ContextTypes.DEFAULT_TYPE, 
         await context.bot.send_message(chat_id=update.effective_chat.id, text="Возникла ошибка")
 
 
-async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def free_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    print(update.message.message_id)
     user_obj = await backends_acync.afind_user_or_create(update.message.from_user)
     request_user = await request_models.find_user_or_create(update.message.from_user)
     logging.info(f"Request for user {user_obj.user_id} ({request_user}): {update.message.text} ")
 
-    if not await backends_acync.track_request(update.message, user_obj):
+    message = await create_task(update.message, request_user)
+    if not await backends_acync.track_request(update.message, user_obj, message.get("message_id")):
         await context.bot.send_message(chat_id=update.effective_chat.id, text="Возникла ошибка")
         return
 
-    message = await create_task(update.message, request_user)
     await wrap_message_send(update, context, message)
-
 
 
 async def with_attachment(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await context.bot.send_message(chat_id=update.effective_chat.id, text="Вложения пока не поддерживаются")
 
 
-async def send_message(user_id: int, message: str):
+async def send_message(user_id: int, message: str, reply_to: int = None):
     async with (bot := telegram.Bot(settings.TELEGRAM_TOKEN)):
-        await bot.send_message(text=message, chat_id=user_id)
+        if not reply_to or reply_to == 0:
+            await bot.send_message(text=message, chat_id=user_id)
+        else:
+            await bot.send_message(text=message, chat_id=user_id, reply_to_message_id=reply_to)
 
 
-async def make_message_to_user(username: str, message: str):
+async def make_message_to_user(username: str, message: str, reply_to: int = None):
     user = await afind_user_by_name(username)
     if not user:
         logging.error("User not found")
@@ -72,12 +75,36 @@ async def make_message_to_user(username: str, message: str):
         logging.error("No message")
         return
     async with (bot := telegram.Bot(settings.TELEGRAM_TOKEN)):
-        await bot.send_message(text=message, chat_id=user.user_id)
+        if not reply_to or reply_to == 0:
+            await bot.send_message(text=message, chat_id=user.user_id)
+        else:
+            await bot.send_message(text=message, chat_id=user.user_id, reply_to_message_id=reply_to)
 
 
 def start_bot():
     application = ApplicationBuilder().token(settings.TELEGRAM_TOKEN).build()
     application.add_handler(CommandHandler('start', start))
-    application.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), echo))
+    application.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), free_message))
     application.add_handler(MessageHandler(filters.ATTACHMENT & (~filters.COMMAND), with_attachment))
     application.run_polling()
+
+
+class SingletonMetaclass(type):
+    _instances = {}
+
+    def __call(cls, *args, **kwargs):
+        if cls not in cls._instances:
+            cls._instances[cls] = super().__call__(*args, **kwargs)
+        return cls._instances[cls]
+
+
+class TelegramBot(metaclass=SingletonMetaclass):
+    token = None
+    bot = None
+
+    def __init__(self, token: str = settings.TELEGRAM_TOKEN):
+        self.bot = telegram.Bot(token)
+
+    async def send_text_message(self, chat_id, text):
+        await self.bot.send_message(chat_id=chat_id, text=text)
+
