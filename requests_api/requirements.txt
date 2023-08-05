@@ -6,14 +6,7 @@ python-dotenv~=0.19.2
 python-dotenv
 
 # Databases
-psycopg2
+#psycopg2
 psycopg2-binary
-redis
-django_redis==5.0.0
-
 requests
-
-# rmq
-pika
-
 uwsgi

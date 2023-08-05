@@ -1,11 +1,11 @@
 version: "3.8"
 
 services:  
-  api.gpt-service:
+  api.telegram:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: api.gpt-service
+    container_name: api.telegram
     restart: always
     entrypoint:
       - "/api/docker-entrypoint.sh"
@@ -14,17 +14,34 @@ services:
     networks:
       - docker_nw
     ports:
-      - "8000:8000"
+      - "8002:8000"
     volumes:
       - .:/code
     env_file:
       - .env
+
+  bot.telegram:
+    build:
+      context: .
+      dockerfile: DockerfileBot
+    container_name: bot.telegram
+    restart: always
+    environment:
+      - DJANGO_PROD=true
+    networks:
+      - docker_nw
+    volumes:
+      - .:/code
+    env_file:
+      - .env
+    depends_on:
+      - api.telegram
       
-  producer.gpt-service:
+  producer.telegram:
     build:
       context: .
       dockerfile: DockerfileProducer
-    container_name: producer.gpt-service
+    container_name: producer.telegram
     restart: always
     environment:
       - DJANGO_PROD=true
@@ -35,12 +52,13 @@ services:
     env_file:
       - .env
     depends_on:
-      - api.gpt-service
-  consumer.gpt-service:
+      - api.telegram
+
+  consumer.telegram:
     build:
       context: .
       dockerfile: DockerfileConsumer
-    container_name: consumer.gpt-service
+    container_name: consumer.telegram
     restart: always
     environment:
       - DJANGO_PROD=true
@@ -51,7 +69,7 @@ services:
     env_file:
       - .env
     depends_on:
-      - api.gpt-service
+      - api.telegram
 
 volumes:
   postgres_data:

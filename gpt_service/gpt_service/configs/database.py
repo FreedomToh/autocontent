@@ -36,16 +36,18 @@ DATABASE_ROUTERS = ["gpt_service.configs.database.DatabaseRouter"]
 
 class DatabaseRouter:
     def db_for_read(self, model, **hints):
-        if model._meta.app_label == "api":
-            return 'requests'
-        return "default"
+        if model._meta.app_label == 'requests_connector':
+            return 'requests'  # Здесь указывается имя базы данных из DATABASES
+        return 'default'  # Возвращайте имя базы данных по умолчанию для других моделей
 
     def db_for_write(self, model, **hints):
-        if model._meta.app_label == "api":
-            return 'requests'
-        return "default"
+        if model._meta.app_label == 'requests_connector':
+            return 'requests'  # Здесь указывается имя базы данных из DATABASES
+        return 'default'  # Возвращайте имя базы данных по умолчанию для других моделей
 
     def allow_migrate(self, db, app_label, model_name=None, **hints):
-        if app_label == "api":
+        if db == 'requests':
             return False
-        return db == "default"
+        elif db == 'default':
+            return app_label != 'requests_connector'
+        return None

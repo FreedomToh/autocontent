@@ -6,7 +6,6 @@ import telegram
 from django.conf import settings
 
 from api import backends_acync
-from api.backends import find_user_by_name
 from api.backends_acync import afind_user_by_name
 from requests_connector import models as request_models
 from requests_connector.models import create_task
@@ -41,11 +40,9 @@ async def wrap_message_send(update: Update, context: ContextTypes.DEFAULT_TYPE, 
 
 
 async def free_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    print(update.message.message_id)
     user_obj = await backends_acync.afind_user_or_create(update.message.from_user)
     request_user = await request_models.find_user_or_create(update.message.from_user)
     logging.info(f"Request for user {user_obj.user_id} ({request_user}): {update.message.text} ")
-
     message = await create_task(update.message, request_user)
     if not await backends_acync.track_request(update.message, user_obj, message.get("message_id")):
         await context.bot.send_message(chat_id=update.effective_chat.id, text="Возникла ошибка")

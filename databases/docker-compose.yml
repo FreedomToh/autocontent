@@ -1,9 +1,9 @@
 version: "3.8"
 
 services:
-  autocontent_pg:
+  pg.autocontent:
     image: postgres:14
-    container_name: autocontent_pg
+    container_name: pg.autocontent
     restart: always
     environment:
       - POSTGRES_USER=postgres
@@ -17,18 +17,18 @@ services:
       - ./.env
     ports:
       - "5433:5432"
-  autocontent_redis:
+  redis.autocontent:
     image: redis:alpine
-    container_name: autocontent_redis
+    container_name: redis.autocontent
     restart: always
     networks:
       - docker_nw
     ports:
       - "6379:6379"
-  autocontent_rmq:
+  rmq.autocontent:
     #https://habr.com/ru/companies/southbridge/articles/704208/
     image: rabbitmq:3.10.7-management
-    container_name: autocontent_rmq
+    container_name: rmq.autocontent
     hostname: rmq_master
     restart: always
     networks:

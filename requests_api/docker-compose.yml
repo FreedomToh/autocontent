@@ -1,0 +1,27 @@
+version: "3.8"
+
+services:  
+  api.requests:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: api.requests
+    restart: always
+    entrypoint:
+      - "/api/docker-entrypoint.sh"
+    environment:
+      - DJANGO_PROD=true
+    networks:
+      - docker_nw
+    ports:
+      - "8001:8000"
+    volumes:
+      - .:/code
+      - ./logs:/api/logs
+    env_file:
+      - .env
+
+networks:
+    docker_nw:
+        driver: bridge
+        external: true

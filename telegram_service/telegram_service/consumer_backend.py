@@ -6,14 +6,14 @@ import time
 from django.conf import settings
 
 from api.bot.backends import TelegramBot, send_message
-from api.models import get_user_id_by_message
+from api.models import get_user_id_by_message, set_message_succeed
 from requests_connector.serializers import get_message_data
 from telegram_service.rmq_backend import Rabbit
 
 
 def receive_message(channel, method, properties, body, args):
-    message_data = Rabbit.decode_rabbit_data(body).get("data")
-    message_id = message_data.get("message_id", "no message id")
+    message = Rabbit.decode_rabbit_data(body).get("data")
+    message_id = message.get("message_id", "no message id")
     # bot_instance = args.get("bot")
     # if not bot_instance:
     #     logging.error(f"receive_message fail: no bot instance")
@@ -38,10 +38,13 @@ def receive_message(channel, method, properties, body, args):
 
     user_id = user_dict.get("user_id")
     reply_id = user_dict.get("parent_message_id")
-    asyncio.run(send_message(user_id=user_id,message=text_response, reply_to=reply_id))
+    asyncio.run(send_message(user_id=user_id, message=text_response, reply_to=reply_id))
+    asyncio.run(send_message(user_id=user_id, message=audio_url, reply_to=reply_id))
+    asyncio.run(send_message(user_id=user_id, message=video_url, reply_to=reply_id))
+    set_message_succeed(message)
 
-    channel.basic_reject(delivery_tag=method.delivery_tag, requeue=True)
-    time.sleep(10)
+    # channel.basic_reject(delivery_tag=method.delivery_tag, requeue=True)
+    channel.basic_ack(delivery_tag=method.delivery_tag)
 
 
 def run_consumer():
