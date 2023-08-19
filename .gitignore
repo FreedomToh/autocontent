@@ -1,6 +1,7 @@
 /gpt_service/.idea
 /databases/pgdata
 /databases/rmqdata
+/databases/redisdata
 /logs
 /gpt_service/logs
 /venv
