@@ -1,0 +1,58 @@
+version: "3.8"
+
+services:  
+  api.tts-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: api.tts-service
+    restart: always
+    entrypoint:
+      - "/api/docker-entrypoint.sh"
+    environment:
+      - DJANGO_PROD=true
+    networks:
+      - docker_nw
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/code
+    env_file:
+      - .env
+      
+  producer.tts-service:
+    build:
+      context: .
+      dockerfile: DockerfileProducer
+    container_name: producer.tts-service
+    restart: always
+    environment:
+      - DJANGO_PROD=true
+    networks:
+      - docker_nw
+    volumes:
+      - .:/code
+    env_file:
+      - .env
+  consumer.tts-service:
+    build:
+      context: .
+      dockerfile: DockerfileConsumer
+    container_name: consumer.tts-service
+    restart: always
+    environment:
+      - DJANGO_PROD=true
+    networks:
+      - docker_nw
+    volumes:
+      - .:/code
+    env_file:
+      - .env
+
+volumes:
+  postgres_data:
+
+networks:
+    docker_nw:
+        driver: bridge
+        external: true

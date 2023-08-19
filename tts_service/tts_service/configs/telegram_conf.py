@@ -3,7 +3,7 @@ import os
 import sys
 
 telegram_api_url = os.getenv("TELEGRAM_BOT")
-service_name = "telegram_service"
+service_name = "tts_service"
 telegram_api_clients = os.getenv("TELEGRAM_USERS", "").split(";")
 
 

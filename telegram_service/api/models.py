@@ -44,6 +44,18 @@ def set_message_in_work(message_dict: dict):
     message.save()
 
 
+def set_message_succeed(message_dict: dict):
+    message_objs = TelegramRequests.objects.filter(request_id=message_dict.get("message_id"))
+    if not message_objs.exists():
+        logging.error(f"set_message_succeed fail: message not exists, {message_dict}")
+        return
+
+    message = message_objs.first()
+    message.in_work = False
+    message.status = True
+    message.save()
+
+
 def get_user_id_by_message(message_id: int) -> dict:
     user_obj = TelegramRequests.objects.filter(request_id=message_id).select_related('user')
     if not user_obj.exists():

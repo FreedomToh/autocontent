@@ -21,6 +21,8 @@ services:
     image: redis:alpine
     container_name: redis.autocontent
     restart: always
+    volumes:
+      - ./redisdata:/data
     networks:
       - docker_nw
     ports:
