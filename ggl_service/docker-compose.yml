@@ -1,11 +1,11 @@
 version: "3.8"
 
 services:  
-  api.tts-service:
+  api.ggl-service:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: api.tts-service
+    container_name: api.ggl-service
     restart: always
     entrypoint:
       - "/api/docker-entrypoint.sh"
@@ -14,17 +14,17 @@ services:
     networks:
       - docker_nw
     ports:
-      - "8003:8000"
+      - "8004:8000"
     volumes:
       - .:/code
     env_file:
       - .env
       
-  producer.tts-service:
+  producer.ggl-service:
     build:
       context: .
       dockerfile: DockerfileProducer
-    container_name: producer.tts-service
+    container_name: producer.ggl-service
     restart: always
     environment:
       - DJANGO_PROD=true
@@ -34,11 +34,11 @@ services:
       - .:/code
     env_file:
       - .env
-  consumer.tts-service:
+  consumer.ggl-service:
     build:
       context: .
       dockerfile: DockerfileConsumer
-    container_name: consumer.tts-service
+    container_name: consumer.ggl-service
     restart: always
     environment:
       - DJANGO_PROD=true

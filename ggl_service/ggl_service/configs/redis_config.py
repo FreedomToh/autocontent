@@ -4,7 +4,7 @@ import django.core.cache.backends.redis
 
 REDIS_URL = os.getenv('REDIS_URL', 'redis://redis.autocontent:6379')
 BROKER_URL = REDIS_URL
-KEY_PREFIX = "tts_service"
+TTS_PREFIX = "tts_service"
 # CELERY_BROKER_URL = REDIS_URL
 # CELERY_RESULT_BACKEND = REDIS_URL
 # CELERY_ACCEPT_CONTENT = ['application/json']
@@ -24,3 +24,5 @@ CACHES = {
         "LOCATION": REDIS_URL
     }
 }
+
+# django.core.cache.backends.redis.RedisCache

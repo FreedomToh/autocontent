@@ -7,7 +7,7 @@ import pika
 from pika import exceptions as pika_exceptions
 from django.conf import settings
 
-from tts_service.exceptions import RMQNoConfigError
+from ggl_service.exceptions import RMQNoConfigError
 
 
 class Rabbit:
@@ -148,4 +148,6 @@ class Rabbit:
     def __del__(self):
         self.stop_consuming()
         self.close()
+
+
 

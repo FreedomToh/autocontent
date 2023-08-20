@@ -22,6 +22,7 @@ def get_statuses():
         1: "INPROCESS",
         2: "READY",
         3: "DOWNLOADED",
+        4: "DOWNLOADING",
     }
     return {mapping[elem.id]: elem for elem in models.StatusesModel.objects.all()}
 

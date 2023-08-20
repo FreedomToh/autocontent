@@ -7,6 +7,7 @@ import functools
 import threading
 
 import pika
+from pika import exceptions as pika_exceptions
 from django.conf import settings
 
 from gpt_service.exceptions import RMQNoConfigError
@@ -34,7 +35,9 @@ class Rabbit:
         self.queue_tank = queue_tank
         self.arguments = arguments
         self.tank_arguments = tank_arguments
+        self.__init_all__()
 
+    def __init_all__(self):
         self.__init_connection__()
         self.__init_channel__()
         self.__binding_queue__()
@@ -82,8 +85,25 @@ class Rabbit:
     def decode_rabbit_data(cls, body: bytes):
         return json.loads(body)
 
+    def __check_connection__(self) -> bool:
+        if self.connection.is_open:
+            return True
+
+        attempts = 5
+        while not self.connection.is_open or attempts > 0:
+            self.__init_all__()
+            attempts -= 1
+
+            if self.connection.is_open:
+                return True
+
+        return False
+
     def publish(self, data: dict) -> bool:
         logging.info(f'Rabbit adding request to queue: {data.get("request_id")}')
+        if not self.__check_connection__():
+            logging.error("Can`t create connection to RMQ")
+            raise pika_exceptions.AMQPConnectionError
 
         need_data = {
             "request_id": data.get("request_id")

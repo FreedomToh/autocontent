@@ -1,11 +1,4 @@
-import logging
-import time
-
-from django.conf import settings
-
-from api import models, serializers
-from api.models import get_query_elements, set_request_in_work, set_request_ready_to_download
-from tts_service.rmq_backend import Rabbit
+from api.models import get_query_elements, set_request_ready_to_download
 from tts_service.yandex_backend import YandexTtsService
 
 
