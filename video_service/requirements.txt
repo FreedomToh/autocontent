@@ -1,0 +1,25 @@
+Django~=4.2.3
+djangorestframework~=3.14
+django-rest-framework-async~=0.1
+django-cors-headers~=4.1.0
+dj-database-url==1.0.0
+python-dotenv~=0.19.2
+
+# Databases
+#psycopg2
+psycopg2-binary
+redis==4.3.4
+
+# google api
+google==3.0.0
+google-api-python-client==1.7.2
+google-auth==2.19.1
+google-auth-httplib2==0.1.0
+google-auth-oauthlib==1.0.0
+
+requests
+
+# rmq
+pika
+
+uwsgi
