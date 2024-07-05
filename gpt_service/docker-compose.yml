@@ -1,14 +1,13 @@
-version: "3.8"
-
-services:  
+services:
   api.gpt-service:
     build:
       context: .
       dockerfile: Dockerfile
+      target: api
     container_name: api.gpt-service
     restart: always
-    entrypoint:
-      - "/api/docker-entrypoint.sh"
+    #entrypoint:
+    #  - "/api/docker-entrypoint.sh"
     environment:
       - DJANGO_PROD=true
     networks:
@@ -23,7 +22,8 @@ services:
   producer.gpt-service:
     build:
       context: .
-      dockerfile: DockerfileProducer
+      dockerfile: Dockerfile
+      target: producer
     container_name: producer.gpt-service
     restart: always
     environment:
@@ -39,7 +39,8 @@ services:
   consumer.gpt-service:
     build:
       context: .
-      dockerfile: DockerfileConsumer
+      dockerfile: Dockerfile
+      target: consumer
     container_name: consumer.gpt-service
     restart: always
     environment:
